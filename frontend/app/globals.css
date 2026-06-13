@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; }
+body { margin: 0; color: #17202a; background: #eef2f6; }
+button, input, select, textarea { font: inherit; }
+.leaflet-container { height: 100%; width: 100%; }
+.status-severe_acute_malnutrition, .severity-critical { background: #fee2e2; color: #991b1b; }
+.status-moderate_acute_malnutrition, .severity-high { background: #ffedd5; color: #9a3412; }
+.status-normal, .severity-low { background: #dcfce7; color: #166534; }
+.status-overweight, .severity-medium { background: #fef9c3; color: #854d0e; }
