@@ -3,19 +3,20 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Activity, Bell, ChartLine, ClipboardList, FileText, LayoutDashboard, LogOut, Map, Users } from "lucide-react";
+import { Activity, Bell, Building2, ChartLine, ClipboardList, FileText, Flame, LayoutDashboard, LogOut, Map, Users } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 
 const nav = [
   ["Dashboard", "/dashboard", LayoutDashboard],
   ["Map", "/map", Map],
+  ["Heatmap", "/heatmap", Flame],
   ["Children", "/children", Users],
   ["Growth", "/growth", ChartLine],
   ["Reports", "/reports", FileText],
   ["Referrals", "/referrals", ClipboardList],
   ["Alerts", "/alerts", Bell],
 ];
-const adminNav = [["Users", "/admin/users", Users], ["Logs", "/admin/logs", Activity]];
+const adminNav = [["Barangays", "/admin/barangays", Building2], ["Users", "/admin/users", Users], ["Logs", "/admin/logs", Activity]];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

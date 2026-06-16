@@ -31,8 +31,24 @@ async def barangay_choropleth(db: AsyncSession = Depends(get_db)):
     for b in (await db.scalars(select(Barangay).order_by(Barangay.name))).all():
         measurements = await latest_measurements(db, b.id)
         prevalence = calculate_prevalence(measurements)
+        severe_count = sum(1 for m in measurements if m.overall_status.value == "severe_acute_malnutrition")
+        moderate_count = sum(1 for m in measurements if m.overall_status.value == "moderate_acute_malnutrition")
+        malnutrition_count = severe_count + moderate_count
+        total_children = prevalence["sample_size"]
+        malnutrition_rate = round((malnutrition_count / total_children * 100), 1) if total_children else 0
+        risk_level = "critical" if severe_count else "high" if malnutrition_rate >= 20 else "medium" if malnutrition_count else "low"
         alert_count = await db.scalar(select(Alert).join(Child, Child.id == Alert.child_id).where(Child.barangay_id == b.id, Alert.is_resolved.is_(False)).count()) if False else 0
-        features.append(feature(b, {"name": b.name, "risk_level": classify_risk_level(prevalence), "prevalence_rate": prevalence["wasting_rate"], "total_children": prevalence["sample_size"], "alert_count": alert_count}))
+        features.append(feature(b, {
+            "name": b.name,
+            "risk_level": risk_level,
+            "prevalence_rate": malnutrition_rate,
+            "wasting_rate": prevalence["wasting_rate"],
+            "total_children": total_children,
+            "malnutrition_count": malnutrition_count,
+            "moderate_count": moderate_count,
+            "severe_count": severe_count,
+            "alert_count": alert_count,
+        }))
     return {"type": "FeatureCollection", "features": features}
 
 
