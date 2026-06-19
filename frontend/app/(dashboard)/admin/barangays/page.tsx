@@ -9,6 +9,7 @@ import { Panel } from "@/components/ui/Panel";
 
 export default function BarangayManagementPage() {
   const [selectedId, setSelectedId] = useState("");
+  const [search, setSearch] = useState("");
   const barangays = useQuery({ queryKey: ["barangays"], queryFn: () => api.get("/api/barangays").then((r) => r.data) });
   const puroks = useQuery({ queryKey: ["puroks"], queryFn: () => api.get("/api/puroks").then((r) => r.data) });
   const children = useQuery({ queryKey: ["children-admin"], queryFn: () => api.get("/api/children").then((r) => r.data) });
@@ -23,7 +24,17 @@ export default function BarangayManagementPage() {
     });
   }, [barangays.data, children.data, puroks.data, users.data]);
 
-  const selected = rows.find((row: any) => row.id === selectedId) || rows[0];
+  const filteredRows = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return rows;
+    return rows.filter((row: any) =>
+      row.name.toLowerCase().includes(query) ||
+      row.code.toLowerCase().includes(query) ||
+      row.assigned_admin?.username?.toLowerCase().includes(query)
+    );
+  }, [rows, search]);
+
+  const selected = filteredRows.find((row: any) => row.id === selectedId) || filteredRows[0] || rows.find((row: any) => row.id === selectedId) || rows[0];
   const selectedPuroks = (puroks.data || []).filter((p: any) => p.barangay_id === selected?.id);
 
   return (
@@ -39,6 +50,12 @@ export default function BarangayManagementPage() {
       </div>
 
       <Panel title="Barangays">
+        <input
+          className="mb-4 w-full rounded border px-3 py-2 text-sm md:max-w-sm"
+          placeholder="Search barangay, code, or admin"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
@@ -52,7 +69,7 @@ export default function BarangayManagementPage() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((row: any) => (
+              {filteredRows.map((row: any) => (
                 <tr key={row.id} className="border-b last:border-0">
                   <td className="py-2 font-medium">{row.name}</td>
                   <td>{row.code}</td>
